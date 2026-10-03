@@ -15,7 +15,7 @@
             /* Sfondo animato a contrasto più elevato e movimento accelerato */
             background: linear-gradient(135deg, #fff9e6, #fceaa1, #f7d070, #fffcf5);
             background-size: 300% 300%;
-            animation: softGradient 10s ease infinite; /* Ridotto a 10s per un movimento più visibile */
+            animation: softGradient 10s ease infinite;
             
             display: flex;
             flex-direction: column;
@@ -23,7 +23,7 @@
             align-items: center;
             min-height: 100vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden; /* Sostituito overflow-x per contenere l'animazione a schermo intero */
+            overflow: hidden;
             padding: 20px;
             position: relative;
         }
@@ -35,15 +35,16 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* Canvas per la simulazione degli uccelli posizionato sullo sfondo */
+        /* FIX DEF: Il canvas ora copre in modo tassativo la finestra ed è visibile */
         #birdsCanvas {
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
             pointer-events: none;
             z-index: 1;
+            display: block;
         }
 
         /* Contenitore principale della dashboard (Layout centrale stabile) */
@@ -53,7 +54,7 @@
             align-items: center;
             width: 100%;
             max-width: 800px;
-            z-index: 2; /* Elevato per stare sopra al canvas animato */
+            z-index: 2; /* Sopra al canvas degli uccelli */
         }
 
         /* Contenitore principale del logo */
@@ -184,7 +185,7 @@
 </head>
 <body>
 
-    <!-- Canvas di sfondo per la simulazione degli uccelli -->
+    <!-- Canvas per gli uccelli animati -->
     <canvas id="birdsCanvas"></canvas>
 
     <div class="dashboard-wrapper">
@@ -208,14 +209,13 @@
             </div>
         </div>
 
-        <!-- Widget Informazioni Meteo Locali Reali -->
+        <!-- Widget Informazioni Meteo -->
         <div class="weather-widget">
             <div class="weather-loc">
                 <h2>Arnoga</h2>
                 <span>Valdidentro, Sondrio</span>
             </div>
             <div class="weather-details">
-                <!-- Dati meteorologici reali correnti estratti per l'area di Arnoga -->
                 <div class="weather-temp">11</div>
                 <div class="weather-meta">
                     <div>Condizione: <strong>Parz. Soleggiato</strong></div>
@@ -227,7 +227,7 @@
     </div>
 
     <script>
-        // --- LOGICA GESTIONE OROLOGIO LIVE ---
+        // --- LOGICA OROLOGIO ---
         const hourHand = document.getElementById('hour');
         const minuteHand = document.getElementById('minute');
         const secondHand = document.getElementById('second');
@@ -247,40 +247,51 @@
             hourHand.style.transform = `rotate(${hoursDegrees}deg)`;
         }
 
-        // Intervallo di aggiornamento orologio (1 secondo)
         setInterval(updateClock, 1000);
         updateClock();
 
 
-        // --- LOGICA ANIMAZIONE ELEGANTE UCCELLI (CANVAS HTML5) ---
+        // --- LOGICA ANIMAZIONE UCCELLI CORRETTA ---
         const canvas = document.getElementById('birdsCanvas');
         const ctx = canvas.getContext('2d');
 
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+        function initCanvasSize() {
+            // Calcolo esatto dei margini per forzare la visibilità del quadro di disegno
+            canvas.width = window.innerWidth || document.documentElement.clientWidth;
+            canvas.height = window.innerHeight || document.documentElement.clientHeight;
         }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+        
+        window.addEventListener('resize', () => {
+            initCanvasSize();
+        });
+        initCanvasSize();
 
         class Bird {
             constructor() {
                 this.reset();
-                // Distribuisce gli uccelli in posizioni X casuali all'avvio per un ingresso scaglionato
-                this.x = Math.random() * canvas.width;
+                this.x = Math.random() * canvas.width; // Sparpiglia gli uccelli all'avvio
             }
 
             reset() {
-                this.x = canvas.width + Math.random() * 150; // Generazione fuori schermo a destra
-                this.y = Math.random() * (canvas.height * 0.55); // Volo limitato alla metà superiore del display
-                this.size = Math.random() * 10 + 5; // Dimensione randomizzata per l'effetto profondità (5px - 15px)
-                this.speedX = Math.random() * 1.2 + 0.6; // Velocità di spostamento orizzontale verso sinistra
-                this.wingSpeed = Math.random() * 0.12 + 0.06; // Frequenza del battito d'ali casuale
-                this.wingPhase = Math.random() * Math.PI; // Fase iniziale dell'onda del battito
-                this.opacity = Math.random() * 0.22 + 0.12; // Opacità ridotta per mantenere l'eleganza dello sfondo
+                this.x = canvas.width + Math.random() * 200;
+                this.y = Math.random() * (canvas.height * 0.5); // Volano in alto sopra le scritte
+                this.size = Math.random() * 12 + 6; // Dimensioni differenti (6px a 18px)
+                this.speedX = Math.random() * 1.5 + 0.7; // Velocità random verso sinistra
+                this.wingSpeed = Math.random() * 0.15 + 0.08;
+                this.wingPhase = Math.random() * Math.PI;
+                // FIX: Opacità alzata per renderli ben nitidi sul fondo giallo/oro
+                this.opacity = Math.random() * 0.3 + 0.35; 
             }
 
             update() {
                 this.x -= this.speedX;
                 this.wingPhase += this.wingSpeed;
+                
+                // Se esce dallo schermo ricomincia da destra
+                if (this.x < -this.size * 2) {
+                    this.reset();
+                }
+            }
 
+            draw() {
+                ctx.save();
