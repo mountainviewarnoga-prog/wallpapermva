@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arnoga Mountain View Resort & Spa - Live Clock, Weather & Birds</title>
+    <title>Arnoga Mountain View Resort & Spa - Live Clock & Weather</title>
     <style>
         * {
             box-sizing: border-box;
@@ -34,7 +34,7 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* Canvas per gli uccelli in volo posizionato dietro al testo e al logo */
+        /* Canvas per gli uccelli in volo in background */
         #birdsCanvas {
             position: absolute;
             top: 0;
@@ -45,17 +45,17 @@
             z-index: 1;
         }
 
-        /* Contenitore principale della dashboard posizionato sopra il canvas */
+        /* Contenitore principale posizionato sopra il canvas */
         .dashboard-wrapper {
             display: flex;
             flex-direction: column;
             align-items: center;
             width: 100%;
             max-width: 800px;
-            z-index: 2; /* Sopra il canvas */
+            z-index: 2;
         }
 
-        /* Contenitore principale del logo */
+        /* Contenitore del logo */
         .logo-container {
             position: relative;
             width: 100%;
@@ -89,21 +89,10 @@
             height: 78%;
         }
 
-        /* Effetto 3D e ombreggiatura profonda per le lancette dorate */
-        .hand {
-            stroke-linecap: round;
+        /* Stile di rotazione e ombra 3D per le singole lancette */
+        .hand-group {
             transform-origin: 50px 50px;
-            filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.35)) drop-shadow(0px 4px 8px rgba(0,0,0,0.15));
-        }
-
-        .hour-hand { stroke-width: 4.5; }
-        .minute-hand { stroke-width: 3; }
-        .second-hand { stroke-width: 1.5; }
-
-        /* Perno centrale dorato lucido */
-        .center-dot { 
-            fill: url(#goldGradientReal);
-            filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.4));
+            filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.3)) drop-shadow(0px 4px 6px rgba(0,0,0,0.15));
         }
 
         /* Widget Meteo */
@@ -180,7 +169,7 @@
 </head>
 <body>
 
-    <!-- Canvas per la simulazione di volo in background -->
+    <!-- Canvas Uccelli -->
     <canvas id="birdsCanvas"></canvas>
 
     <div class="dashboard-wrapper">
@@ -190,27 +179,43 @@
             <div class="clock-overlay">
                 <svg class="gold-clock" viewBox="0 0 100 100">
                     <defs>
-                        <linearGradient id="goldGradientReal" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#f9f5db" />
-                            <stop offset="30%" stop-color="#dfb743" />
+                        <!-- Gradiente Oro Metallico 3D Realistico -->
+                        <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#fffbdf" />
+                            <stop offset="30%" stop-color="#eec754" />
                             <stop offset="50%" stop-color="#b8860b" />
-                            <stop offset="70%" stop-color="#eec754" />
-                            <stop offset="100%" stop-color="#9a6b00" />
+                            <stop offset="70%" stop-color="#fdf3cd" />
+                            <stop offset="100%" stop-color="#8a5e00" />
                         </linearGradient>
                     </defs>
 
-                    <!-- Indicatori ore -->
-                    <g stroke="url(#goldGradientReal)" stroke-width="1.5" stroke-linecap="round" opacity="0.85">
+                    <!-- Indicatori delle ore sul cerchio -->
+                    <g stroke="url(#goldGradient)" stroke-width="1.5" stroke-linecap="round" opacity="0.8">
                         <line x1="50" y1="6" x2="50" y2="12" />
                         <line x1="94" y1="50" x2="88" y2="50" />
                         <line x1="50" y1="94" x2="50" y2="88" />
                         <line x1="6" y1="50" x2="12" y2="50" />
                     </g>
                     
-                    <line id="hour" class="hand hour-hand" stroke="url(#goldGradientReal)" x1="50" y1="62" x2="50" y2="22" />
-                    <line id="minute" class="hand minute-hand" stroke="url(#goldGradientReal)" x1="50" y1="68" x2="50" y2="10" />
-                    <line id="second" class="hand second-hand" stroke="url(#goldGradientReal)" x1="50" y1="75" x2="50" y2="5" />
-                    <circle class="center-dot" cx="50" cy="50" r="4" />
+                    <!-- LANCETTE STRUTTURATE IN POLIGONI (Visibili e animate al 100% della lunghezza) -->
+                    <!-- Ore: sagomata a losanga slanciata -->
+                    <g id="hourGroup" class="hand-group">
+                        <polygon points="48,50 50,15 52,50 50,62" fill="url(#goldGradient)" />
+                    </g>
+                    
+                    <!-- Minuti: più lunga e affilata -->
+                    <g id="minuteGroup" class="hand-group">
+                        <polygon points="48.5,50 50,5 51.5,50 50,68" fill="url(#goldGradient)" />
+                    </g>
+                    
+                    <!-- Secondi: ago sottile con cerchio di contrappeso sul retro -->
+                    <g id="secondGroup" class="hand-group">
+                        <rect x="49.3" y="2" width="1.4" height="73" fill="url(#goldGradient)" />
+                        <circle cx="50" cy="75" r="3" fill="url(#goldGradient)" />
+                    </g>
+                    
+                    <!-- Perno centrale dorato lucido -->
+                    <circle cx="50" cy="50" r="4.5" fill="url(#goldGradient)" style="filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.4));" />
                 </svg>
             </div>
         </div>
@@ -233,10 +238,10 @@
     </div>
 
     <script>
-        // --- SEZIONE OROLOGIO LIVE (MOVIMENTO CONTINUO PROFESSIONALE) ---
-        const hourHand = document.getElementById('hour');
-        const minuteHand = document.getElementById('minute');
-        const secondHand = document.getElementById('second');
+        // --- GESTIONE MOVIMENTO CONTINUO PRO OROLOGIO ---
+        const hourGroup = document.getElementById('hourGroup');
+        const minuteGroup = document.getElementById('minuteGroup');
+        const secondGroup = document.getElementById('secondGroup');
 
         function updateClockContinuous() {
             const now = new Date();
@@ -249,13 +254,13 @@
             const exactMinutes = minutes + (exactSeconds / 60);
             const exactHours = (hours % 12) + (exactMinutes / 60);
 
-            secondHand.style.transform = `rotate(${exactSeconds * 6}deg)`;
-            minuteHand.style.transform = `rotate(${exactMinutes * 6}deg)`;
-            hourHand.style.transform = `rotate(${exactHours * 30}deg)`;
+            // Applica la rotazione direttamente ai gruppi SVG tridimensionali
+            secondGroup.style.transform = `rotate(${exactSeconds * 6}deg)`;
+            minuteGroup.style.transform = `rotate(${exactMinutes * 6}deg)`;
+            hourGroup.style.transform = `rotate(${exactHours * 30}deg)`;
         }
 
-
-        // --- SEZIONE CANVAS UCCELLI ANIMATI (RANDOM E FLUIDI) ---
+        // --- SISTEMA ANIMAZIONE CANVAS UCCELLI ---
         const canvas = document.getElementById('birdsCanvas');
         const ctx = canvas.getContext('2d');
 
@@ -269,14 +274,13 @@
         class Bird {
             constructor() {
                 this.reset();
-                // Inizia sparpagliando gli uccelli in posizioni casuali per non farli nascere tutti insieme
                 this.x = Math.random() * canvas.width;
             }
 
             reset() {
-                this.x = canvas.width + Math.random() * 100; // Nasce fuori schermo a destra
-                this.y = Math.random() * (canvas.height * 0.6); // Vola nella metà superiore dello schermo
-                this.size = Math.random() * 12 + 6; // Dimensione random (da 6px a 18px per simulare la profondità)
-                this.speedX = (Math.random() * 1.5 + 0.8); // Velocità di volo verso sinistra
-                this.wingSpeed = Math.random() * 0.15 + 0.08; // Frequenza del battito d'ali random
-                this.wingPhase = Math.random() * Math.PI; // Fase iniziale del battito
+                this.x = canvas.width + Math.random() * 100;
+                this.y = Math.random() * (canvas.height * 0.6);
+                this.size = Math.random() * 12 + 6;
+                this.speedX = (Math.random() * 1.5 + 0.8);
+                this.wingSpeed = Math.random() * 0.15 + 0.08;
+                this.wingPhase = Math.random() * Math.PI;
