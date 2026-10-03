@@ -12,7 +12,7 @@
         }
 
         body {
-            /* Sfondo animato a contrasto più elevato e movimento accelerato */
+            /* Sfondo animato fluido con i colori del resort */
             background: linear-gradient(135deg, #fff9e6, #fceaa1, #f7d070, #fffcf5);
             background-size: 300% 300%;
             animation: softGradient 10s ease infinite;
@@ -28,7 +28,6 @@
             position: relative;
         }
 
-        /* Animazione per il movimento visibile e ondulatorio dei colori */
         @keyframes softGradient {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
@@ -47,7 +46,7 @@
             display: block;
         }
 
-        /* Contenitore principale della dashboard (Layout centrale stabile) */
+        /* Contenitore principale della dashboard */
         .dashboard-wrapper {
             display: flex;
             flex-direction: column;
@@ -66,14 +65,13 @@
             margin-bottom: 30px;
         }
 
-        /* L'immagine del logo fa da base proporzionale */
         .logo-img {
             width: 100%;
             height: auto;
             display: block;
         }
 
-        /* Contenitore dell'orologio posizionato esattamente sopra il cerchio giallo */
+        /* Contenitore dell'orologio posizionato sopra il cerchio giallo */
         .clock-overlay {
             position: absolute;
             top: 0%; 
@@ -87,18 +85,18 @@
             pointer-events: none;
         }
 
-        /* Stile dell'orologio SVG */
         .gold-clock {
             width: 78%;
             height: 78%;
         }
 
-        /* Doppia ombra proiettata per l'effetto rilievo 3D delle lancette */
+        /* Effetto ombra 3D applicato direttamente sulle linee delle lancette */
         .copper-hand {
+            stroke-linecap: round;
             filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.35)) drop-shadow(0px 4px 6px rgba(0,0,0,0.15));
         }
 
-        /* WIDGET METEO IN PANDANE CON LO STILE RESORT */
+        /* Widget Meteo */
         .weather-widget {
             background: rgba(255, 255, 255, 0.75);
             backdrop-filter: blur(10px);
@@ -167,9 +165,7 @@
             padding-left: 15px;
         }
 
-        .weather-meta strong {
-            color: #1a1a1a;
-        }
+        .weather-meta strong { color: #1a1a1a; }
     </style>
 </head>
 <body>
@@ -178,7 +174,6 @@
     <canvas id="birdsCanvas"></canvas>
 
     <div class="dashboard-wrapper">
-        <!-- Contenitore Logo e Orologio -->
         <div class="logo-container">
             <img class="logo-img" src="logo-mountainviewresortarnoga.png" alt="Arnoga Mountain View Resort & Spa Logo">
             
@@ -196,34 +191,33 @@
                     </defs>
 
                     <!-- Indicatori ore rame -->
-                    <g stroke="url(#copperGradient)" stroke-width="1.5" stroke-linecap="round" opacity="0.8">
+                    <g stroke="url(#copperGradient)" stroke-width="1.5" stroke-linecap="round" opacity="0.75">
                         <line x1="50" y1="6" x2="50" y2="12" />
                         <line x1="94" y1="50" x2="88" y2="50" />
                         <line x1="50" y1="94" x2="50" y2="88" />
                         <line x1="6" y1="50" x2="12" y2="50" />
                     </g>
                     
-                    <!-- LANCETTE IN RAME COMPATIBILI E MODELLATE (Lunghe il doppio) -->
-                    <g id="hourGroup" class="copper-hand">
-                        <polygon points="48,50 50,15 52,50 50,62" fill="url(#copperGradient)" />
+                    <!-- LANCETTE LUNGHE IL DOPPIO CON METODO VETTORIALE MATEMATICO DIRETTO (Garantite anti-blocco) -->
+                    <!-- Ore: Spessa e slanciata -->
+                    <line id="hourHand" class="copper-hand" stroke="url(#copperGradient)" stroke-width="4" x1="50" y1="50" x2="50" y2="15" />
+                    
+                    <!-- Minuti: Sottile e lunga a filo quadrante -->
+                    <line id="minuteHand" class="copper-hand" stroke="url(#copperGradient)" stroke-width="2.5" x1="50" y1="50" x2="50" y2="4" />
+                    
+                    <!-- Secondi: Filiforme con contrappeso incorporato -->
+                    <g class="copper-hand">
+                        <line id="secondHand" stroke="url(#copperGradient)" stroke-width="1.2" x1="50" y1="50" x2="50" y2="2" />
+                        <line id="secondCounterweight" stroke="url(#copperGradient)" stroke-width="2.5" x1="50" y1="50" x2="50" y2="72" />
                     </g>
                     
-                    <g id="minuteGroup" class="copper-hand">
-                        <polygon points="48.5,50 50,4 51.5,50 50,68" fill="url(#copperGradient)" />
-                    </g>
-                    
-                    <g id="secondGroup" class="copper-hand">
-                        <rect x="49.3" y="2" width="1.4" height="73" fill="url(#copperGradient)" />
-                        <circle cx="50" cy="75" r="3" fill="url(#copperGradient)" />
-                    </g>
-                    
-                    <!-- Perno centrale -->
-                    <circle cx="50" cy="50" r="4.5" fill="url(#copperGradient)" style="filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.4));" />
+                    <!-- Perno centrale in rilievo -->
+                    <circle cx="50" cy="50" r="4" fill="url(#copperGradient)" style="filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.4));" />
                 </svg>
             </div>
         </div>
 
-        <!-- Widget Informazioni Meteo Locali -->
+        <!-- Widget Informazioni Meteo -->
         <div class="weather-widget">
             <div class="weather-loc">
                 <h2>Arnoga</h2>
@@ -241,39 +235,35 @@
     </div>
 
     <script>
-        // --- LOGICA RE-INGEGNERIZZATA OROLOGIO LIVE CONTINUO ---
-        const hourGroup = document.getElementById('hourGroup');
-        const minuteGroup = document.getElementById('minuteGroup');
-        const secondGroup = document.getElementById('secondGroup');
+        // --- LOGICA TRIGONOMETRICA AVANZATA OROLOGIO LIVE CONTINUO ---
+        const hourHand = document.getElementById('hourHand');
+        const minuteHand = document.getElementById('minuteHand');
+        const secondHand = document.getElementById('secondHand');
+        const secondCounterweight = document.getElementById('secondCounterweight');
 
-        function updateClockContinuous() {
+        // Lunghezze fisiche reali delle lancette calcolate dal centro (50, 50)
+        const lenHour = 35;          // Arriva a Y=15
+        const lenMinute = 46;        // Arriva a Y=4
+        const lenSecond = 48;        // Arriva a Y=2
+        const lenCounterweight = 22; // Contrappeso posteriore dei secondi a Y=72
+
+        function updateClockTrigonometric() {
             const now = new Date();
             const hours = now.getHours();
             const minutes = now.getMinutes();
             const seconds = now.getSeconds();
             const milliseconds = now.getMilliseconds();
 
-            // Calcolo millesimale dei gradi per lo scorrimento fluido (movimento sweep a 60fps)
+            // Calcolo decimale millesimale continuo per fluidità cronografo a 60fps
             const exactSeconds = seconds + (milliseconds / 1000);
             const exactMinutes = minutes + (exactSeconds / 60);
             const exactHours = (hours % 12) + (exactMinutes / 60);
 
-            const secondsDegrees = exactSeconds * 6;
-            const minutesDegrees = exactMinutes * 6;
-            const hoursDegrees = exactHours * 30;
+            // Conversione del tempo in radianti (compensando l'offset di 90° dell'orologio che parte dall'alto)
+            const radSecond = (exactSeconds * 6 - 90) * Math.PI / 180;
+            const radMinute = (exactMinutes * 6 - 90) * Math.PI / 180;
+            const radHour = (exactHours * 30 - 90) * Math.PI / 180;
+            const radCounter = (exactSeconds * 6 + 90) * Math.PI / 180; // Invertito di 180° per il retro
 
-            // Iniezione diretta tramite attributi SVG nativi: garantisce il perfetto funzionamento su GitHub Pages
-            secondGroup.setAttribute("transform", `rotate(${secondsDegrees}, 50, 50)`);
-            minuteGroup.setAttribute("transform", `rotate(${minutesDegrees}, 50, 50)`);
-            hourGroup.setAttribute("transform", `rotate(${hoursDegrees}, 50, 50)`);
-        }
-
-
-        // --- LOGICA ANIMAZIONE ELEGANTE UCCELLI ---
-        const canvas = document.getElementById('birdsCanvas');
-        const ctx = canvas.getContext('2d');
-
-        function initCanvasSize() {
-            canvas.width = window.innerWidth || document.documentElement.clientWidth;
-            canvas.height = window.innerHeight || document.documentElement.clientHeight;
-        }
+            // Calcolo geometrico dei punti di arrivo X2 e Y2 per ciascun elemento
+            hourHand.setAttribute("x2", 50 + lenHour * Math.cos(radHour));
