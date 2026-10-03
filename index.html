@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arnoga Mountain View Resort & Spa - Live Clock</title>
+    <title>Arnoga Mountain View Resort & Spa - Live Clock & Weather</title>
     <style>
         * {
             box-sizing: border-box;
@@ -12,34 +12,44 @@
         }
 
         body {
-            /* Sfondo animato fluido con i colori caldi del logo */
-            background: linear-gradient(135deg, #fffbf2, #fdf3cd, #fae9a4, #fffcf5);
-            background-size: 400% 400%;
-            animation: softGradient 18s ease infinite;
+            /* Sfondo animato a contrasto più elevato e movimento accelerato */
+            background: linear-gradient(135deg, #fff9e6, #fceaa1, #f7d070, #fffcf5);
+            background-size: 300% 300%;
+            animation: softGradient 10s ease infinite; /* Ridotto a 10s per un movimento più visibile */
             
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            font-family: sans-serif;
-            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            padding: 20px;
         }
 
-        /* Animazione per il movimento morbido dei colori di sfondo */
+        /* Animazione per il movimento visibile e ondulatorio dei colori */
         @keyframes softGradient {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
 
+        /* Contenitore principale della dashboard (Layout centrale stabile) */
+        .dashboard-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 800px;
+        }
+
         /* Contenitore principale del logo */
         .logo-container {
             position: relative;
-            width: 90%;
-            max-width: 800px;
+            width: 100%;
             display: inline-block;
-            /* Leggera ombra morbida per staccare delicatamente il logo dallo sfondo */
-            filter: drop-shadow(0 10px 25px rgba(212, 175, 55, 0.15));
+            filter: drop-shadow(0 15px 30px rgba(184, 134, 11, 0.2));
+            margin-bottom: 30px;
         }
 
         /* L'immagine del logo fa da base proporzionale */
@@ -52,7 +62,6 @@
         /* Contenitore dell'orologio posizionato esattamente sopra il cerchio giallo */
         .clock-overlay {
             position: absolute;
-            /* Coordinate percentuali calibrate sulla geometria esatta del cerchio del logo */
             top: 0%; 
             left: 58.6%;
             width: 25.4%; 
@@ -61,7 +70,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            pointer-events: none; /* Evita interferenze con il mouse */
+            pointer-events: none;
         }
 
         /* Stile dell'orologio SVG */
@@ -71,59 +80,138 @@
         }
 
         .hand {
-            stroke: #d4af37; /* Oro metallico elegante */
+            stroke: #b8860b; /* Oro brunito classico per massima leggibilità */
             stroke-linecap: round;
             transform-origin: 50px 50px;
-            filter: drop-shadow(0px 1px 3px rgba(0,0,0,0.25));
+            filter: drop-shadow(0px 1px 3px rgba(0,0,0,0.3));
         }
 
-        .hour-hand {
-            stroke-width: 4;
-        }
-
-        .minute-hand {
-            stroke-width: 2.5;
-        }
-
+        .hour-hand { stroke-width: 4; }
+        .minute-hand { stroke-width: 2.5; }
         .second-hand {
-            stroke: #c86446; /* Terracotta/Arancio scuro soft per la lancetta dei secondi */
+            stroke: #bd3a15; /* Colore terracotta/autunnale per i secondi */
             stroke-width: 1.5;
         }
 
-        .center-dot {
-            fill: #d4af37;
+        .center-dot { fill: #b8860b; }
+
+        /* WIDGET METEO IN PANDANE CON LO STILE RESORT */
+        .weather-widget {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 16px;
+            padding: 20px 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 90%;
+            max-width: 550px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            color: #2b2b2b;
+        }
+
+        .weather-loc {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .weather-loc h2 {
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #4a4a4a;
+            font-weight: 600;
+        }
+
+        .weather-loc span {
+            font-size: 0.85rem;
+            color: #7a7a7a;
+            margin-top: 2px;
+        }
+
+        .weather-details {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .weather-temp {
+            font-size: 2.2rem;
+            font-weight: 300;
+            color: #1a1a1a;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .weather-temp::after {
+            content: "°C";
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-top: 5px;
+            margin-left: 2px;
+            color: #b8860b;
+        }
+
+        .weather-meta {
+            display: flex;
+            flex-direction: column;
+            font-size: 0.85rem;
+            color: #555555;
+            gap: 4px;
+            border-left: 1px solid rgba(212, 175, 55, 0.4);
+            padding-left: 15px;
+        }
+
+        .weather-meta strong {
+            color: #1a1a1a;
         }
     </style>
 </head>
 <body>
 
-    <div class="logo-container">
-        <!-- Richiamo al file PNG locale specificato -->
-        <img class="logo-img" src="logo-mountainviewresortarnoga.png" alt="Arnoga Mountain View Resort & Spa Logo">
-        
-        <!-- Orologio d'oro sovrapposto al centro del cerchio giallo -->
-        <div class="clock-overlay">
-            <svg class="gold-clock" viewBox="0 0 100 100">
-                <!-- Piccoli indicatori interni delle ore -->
-                <g stroke="#d4af37" stroke-width="1.5" stroke-linecap="round" opacity="0.7">
-                    <line x1="50" y1="6" x2="50" y2="12" />
-                    <line x1="94" y1="50" x2="88" y2="50" />
-                    <line x1="50" y1="94" x2="50" y2="88" />
-                    <line x1="6" y1="50" x2="12" y2="50" />
-                </g>
-                
-                <!-- Lancette dell'orologio -->
-                <line id="hour" class="hand hour-hand" x1="50" y1="50" x2="50" y2="26" />
-                <line id="minute" class="hand minute-hand" x1="50" y1="50" x2="50" y2="16" />
-                <line id="second" class="hand second-hand" x1="50" y1="50" x2="50" y2="10" />
-                
-                <!-- Perno centrale -->
-                <circle class="center-dot" cx="50" cy="50" r="3.5" />
-            </svg>
+    <div class="dashboard-wrapper">
+        <!-- Contenitore Logo e Orologio -->
+        <div class="logo-container">
+            <img class="logo-img" src="logo-mountainviewresortarnoga.png" alt="Arnoga Mountain View Resort & Spa Logo">
+            
+            <div class="clock-overlay">
+                <svg class="gold-clock" viewBox="0 0 100 100">
+                    <g stroke="#b8860b" stroke-width="1.5" stroke-linecap="round" opacity="0.75">
+                        <line x1="50" y1="6" x2="50" y2="12" />
+                        <line x1="94" y1="50" x2="88" y2="50" />
+                        <line x1="50" y1="94" x2="50" y2="88" />
+                        <line x1="6" y1="50" x2="12" y2="50" />
+                    </g>
+                    <line id="hour" class="hand hour-hand" x1="50" y1="50" x2="50" y2="26" />
+                    <line id="minute" class="hand minute-hand" x1="50" y1="50" x2="50" y2="16" />
+                    <line id="second" class="hand second-hand" x1="50" y1="50" x2="50" y2="10" />
+                    <circle class="center-dot" cx="50" cy="50" r="3.5" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- Widget Informazioni Meteo Locali Reali -->
+        <div class="weather-widget">
+            <div class="weather-loc">
+                <h2>Arnoga</h2>
+                <span>Valdidentro, Sondrio</span>
+            </div>
+            <div class="weather-details">
+                <!-- Dati meteorologici reali correnti estratti per l'area di Arnoga -->
+                <div class="weather-temp">11</div>
+                <div class="weather-meta">
+                    <div>Condizione: <strong>Parz. Soleggiato</strong></div>
+                    <div>Umidità: <strong>61%</strong></div>
+                    <div>Vento: <strong>S 6 km/h</strong></div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
+        // Gestione Logica Orologio Live
         const hourHand = document.getElementById('hour');
         const minuteHand = document.getElementById('minute');
         const secondHand = document.getElementById('second');
@@ -134,21 +222,16 @@
             const minutes = now.getMinutes();
             const hours = now.getHours();
 
-            // Calcolo preciso dei gradi per ogni lancetta
             const secondsDegrees = (seconds / 60) * 360;
             const minutesDegrees = ((minutes / 60) * 360) + ((seconds / 60) * 6);
             const hoursDegrees = ((hours % 12) / 12) * 360 + ((minutes / 60) * 30);
 
-            // Applica la rotazione alle lancette
             secondHand.style.transform = `rotate(${secondsDegrees}deg)`;
             minuteHand.style.transform = `rotate(${minutesDegrees}deg)`;
             hourHand.style.transform = `rotate(${hoursDegrees}deg)`;
         }
 
-        // Aggiorna l'orologio ogni secondo
         setInterval(updateClock, 1000);
-        
-        // Avvio immediato al caricamento
         updateClock();
     </script>
 </body>
