@@ -23,8 +23,9 @@
             align-items: center;
             min-height: 100vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow-x: hidden;
+            overflow: hidden; /* Sostituito overflow-x per contenere l'animazione a schermo intero */
             padding: 20px;
+            position: relative;
         }
 
         /* Animazione per il movimento visibile e ondulatorio dei colori */
@@ -34,6 +35,17 @@
             100% { background-position: 0% 50%; }
         }
 
+        /* Canvas per la simulazione degli uccelli posizionato sullo sfondo */
+        #birdsCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
         /* Contenitore principale della dashboard (Layout centrale stabile) */
         .dashboard-wrapper {
             display: flex;
@@ -41,6 +53,7 @@
             align-items: center;
             width: 100%;
             max-width: 800px;
+            z-index: 2; /* Elevato per stare sopra al canvas animato */
         }
 
         /* Contenitore principale del logo */
@@ -171,6 +184,9 @@
 </head>
 <body>
 
+    <!-- Canvas di sfondo per la simulazione degli uccelli -->
+    <canvas id="birdsCanvas"></canvas>
+
     <div class="dashboard-wrapper">
         <!-- Contenitore Logo e Orologio -->
         <div class="logo-container">
@@ -211,7 +227,7 @@
     </div>
 
     <script>
-        // Gestione Logica Orologio Live
+        // --- LOGICA GESTIONE OROLOGIO LIVE ---
         const hourHand = document.getElementById('hour');
         const minuteHand = document.getElementById('minute');
         const secondHand = document.getElementById('second');
@@ -231,8 +247,40 @@
             hourHand.style.transform = `rotate(${hoursDegrees}deg)`;
         }
 
+        // Intervallo di aggiornamento orologio (1 secondo)
         setInterval(updateClock, 1000);
         updateClock();
-    </script>
-</body>
-</html>
+
+
+        // --- LOGICA ANIMAZIONE ELEGANTE UCCELLI (CANVAS HTML5) ---
+        const canvas = document.getElementById('birdsCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Bird {
+            constructor() {
+                this.reset();
+                // Distribuisce gli uccelli in posizioni X casuali all'avvio per un ingresso scaglionato
+                this.x = Math.random() * canvas.width;
+            }
+
+            reset() {
+                this.x = canvas.width + Math.random() * 150; // Generazione fuori schermo a destra
+                this.y = Math.random() * (canvas.height * 0.55); // Volo limitato alla metà superiore del display
+                this.size = Math.random() * 10 + 5; // Dimensione randomizzata per l'effetto profondità (5px - 15px)
+                this.speedX = Math.random() * 1.2 + 0.6; // Velocità di spostamento orizzontale verso sinistra
+                this.wingSpeed = Math.random() * 0.12 + 0.06; // Frequenza del battito d'ali casuale
+                this.wingPhase = Math.random() * Math.PI; // Fase iniziale dell'onda del battito
+                this.opacity = Math.random() * 0.22 + 0.12; // Opacità ridotta per mantenere l'eleganza dello sfondo
+            }
+
+            update() {
+                this.x -= this.speedX;
+                this.wingPhase += this.wingSpeed;
+
