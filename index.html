@@ -89,9 +89,8 @@
             height: 78%;
         }
 
-        /* Stile di rotazione e ombra 3D per le singole lancette */
-        .hand-group {
-            transform-origin: 50px 50px;
+        /* Ombra 3D multilivello applicata sui gruppi per dare rilievo e profondità reali alle lancette */
+        .3d-hand-shadow {
             filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.3)) drop-shadow(0px 4px 6px rgba(0,0,0,0.15));
         }
 
@@ -169,53 +168,54 @@
 </head>
 <body>
 
-    <!-- Canvas Uccelli -->
+    <!-- Canvas Uccelli in background -->
     <canvas id="birdsCanvas"></canvas>
 
     <div class="dashboard-wrapper">
         <div class="logo-container">
+            <!-- File PNG Locale richiesto -->
             <img class="logo-img" src="logo-mountainviewresortarnoga.png" alt="Arnoga Mountain View Resort & Spa Logo">
             
             <div class="clock-overlay">
                 <svg class="gold-clock" viewBox="0 0 100 100">
                     <defs>
-                        <!-- Gradiente Oro Metallico 3D Realistico -->
-                        <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <!-- Gradiente Oro Metallico 3D Lucido -->
+                        <linearGradient id="goldGradientReal" x1="0%" y1="0%" x2="100%" y2="100%">
                             <stop offset="0%" stop-color="#fffbdf" />
-                            <stop offset="30%" stop-color="#eec754" />
+                            <stop offset="25%" stop-color="#eec754" />
                             <stop offset="50%" stop-color="#b8860b" />
-                            <stop offset="70%" stop-color="#fdf3cd" />
+                            <stop offset="75%" stop-color="#fdf3cd" />
                             <stop offset="100%" stop-color="#8a5e00" />
                         </linearGradient>
                     </defs>
 
-                    <!-- Indicatori delle ore sul cerchio -->
-                    <g stroke="url(#goldGradient)" stroke-width="1.5" stroke-linecap="round" opacity="0.8">
+                    <!-- Indicatori delle ore cardinali -->
+                    <g stroke="url(#goldGradientReal)" stroke-width="1.5" stroke-linecap="round" opacity="0.8">
                         <line x1="50" y1="6" x2="50" y2="12" />
                         <line x1="94" y1="50" x2="88" y2="50" />
                         <line x1="50" y1="94" x2="50" y2="88" />
                         <line x1="6" y1="50" x2="12" y2="50" />
                     </g>
                     
-                    <!-- LANCETTE STRUTTURATE IN POLIGONI (Visibili e animate al 100% della lunghezza) -->
-                    <!-- Ore: sagomata a losanga slanciata -->
-                    <g id="hourGroup" class="hand-group">
-                        <polygon points="48,50 50,15 52,50 50,62" fill="url(#goldGradient)" />
+                    <!-- CORPO DELLE LANCETTE DORATE (Allungate del 100% con contrappeso bilanciato) -->
+                    <!-- Ore: Losanga tridimensionale slanciata -->
+                    <g id="hourGroup" class="3d-hand-shadow">
+                        <polygon points="48,50 50,15 52,50 50,62" fill="url(#goldGradientReal)" />
                     </g>
                     
-                    <!-- Minuti: più lunga e affilata -->
-                    <g id="minuteGroup" class="hand-group">
-                        <polygon points="48.5,50 50,5 51.5,50 50,68" fill="url(#goldGradient)" />
+                    <!-- Minuti: Freccia filiforme ad alta precisione -->
+                    <g id="minuteGroup" class="3d-hand-shadow">
+                        <polygon points="48.5,50 50,4 51.5,50 50,68" fill="url(#goldGradientReal)" />
                     </g>
                     
-                    <!-- Secondi: ago sottile con cerchio di contrappeso sul retro -->
-                    <g id="secondGroup" class="hand-group">
-                        <rect x="49.3" y="2" width="1.4" height="73" fill="url(#goldGradient)" />
-                        <circle cx="50" cy="75" r="3" fill="url(#goldGradient)" />
+                    <!-- Secondi: Stile ago cronografo continuo con contrappeso circolare retrostante -->
+                    <g id="secondGroup" class="3d-hand-shadow">
+                        <rect x="49.3" y="2" width="1.4" height="73" fill="url(#goldGradientReal)" />
+                        <circle cx="50" cy="75" r="3" fill="url(#goldGradientReal)" />
                     </g>
                     
-                    <!-- Perno centrale dorato lucido -->
-                    <circle cx="50" cy="50" r="4.5" fill="url(#goldGradient)" style="filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.4));" />
+                    <!-- Perno copri-meccanismo centrale dorato in rilievo -->
+                    <circle cx="50" cy="50" r="4.5" fill="url(#goldGradientReal)" style="filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.4));" />
                 </svg>
             </div>
         </div>
@@ -238,7 +238,7 @@
     </div>
 
     <script>
-        // --- GESTIONE MOVIMENTO CONTINUO PRO OROLOGIO ---
+        // --- LOGICA DI ROTAZIONE NATIVA IN LINEA (FIX FIX TOTALE PER GITHUB PAGES) ---
         const hourGroup = document.getElementById('hourGroup');
         const minuteGroup = document.getElementById('minuteGroup');
         const secondGroup = document.getElementById('secondGroup');
@@ -250,17 +250,23 @@
             const seconds = now.getSeconds();
             const milliseconds = now.getMilliseconds();
 
+            // Calcoli decimali fluidi a 60 frame per secondo
             const exactSeconds = seconds + (milliseconds / 1000);
             const exactMinutes = minutes + (exactSeconds / 60);
             const exactHours = (hours % 12) + (exactMinutes / 60);
 
-            // Applica la rotazione direttamente ai gruppi SVG tridimensionali
-            secondGroup.style.transform = `rotate(${exactSeconds * 6}deg)`;
-            minuteGroup.style.transform = `rotate(${exactMinutes * 6}deg)`;
-            hourGroup.style.transform = `rotate(${exactHours * 30}deg)`;
+            const secondsDegrees = exactSeconds * 6;
+            const minutesDegrees = exactMinutes * 6;
+            const hoursDegrees = exactHours * 30;
+
+            // FIX DEF: Iniettiamo la rotazione direttamente negli attributi SVG nativi (gradi, centroX, centroY)
+            // Questo sovrascrive qualsiasi bug CSS o incompatibilità cross-browser
+            secondGroup.setAttribute("transform", `rotate(${secondsDegrees}, 50, 50)`);
+            minuteGroup.setAttribute("transform", `rotate(${minutesDegrees}, 50, 50)`);
+            hourGroup.setAttribute("transform", `rotate(${hoursDegrees}, 50, 50)`);
         }
 
-        // --- SISTEMA ANIMAZIONE CANVAS UCCELLI ---
+        // --- SISTEMA ANIMAZIONE CANVAS UCCELLI IN SILLUETTE ---
         const canvas = document.getElementById('birdsCanvas');
         const ctx = canvas.getContext('2d');
 
@@ -268,19 +274,3 @@
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
         }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        class Bird {
-            constructor() {
-                this.reset();
-                this.x = Math.random() * canvas.width;
-            }
-
-            reset() {
-                this.x = canvas.width + Math.random() * 100;
-                this.y = Math.random() * (canvas.height * 0.6);
-                this.size = Math.random() * 12 + 6;
-                this.speedX = (Math.random() * 1.5 + 0.8);
-                this.wingSpeed = Math.random() * 0.15 + 0.08;
-                this.wingPhase = Math.random() * Math.PI;
