@@ -35,7 +35,7 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* FIX DEF: Il canvas ora copre in modo tassativo la finestra ed è visibile */
+        /* Il canvas copre interamente la finestra dietro la dashboard */
         #birdsCanvas {
             position: absolute;
             top: 0;
@@ -54,7 +54,7 @@
             align-items: center;
             width: 100%;
             max-width: 800px;
-            z-index: 2; /* Sopra al canvas degli uccelli */
+            z-index: 2;
         }
 
         /* Contenitore principale del logo */
@@ -93,21 +93,10 @@
             height: 78%;
         }
 
-        .hand {
-            stroke: #b8860b; /* Oro brunito classico per massima leggibilità */
-            stroke-linecap: round;
-            transform-origin: 50px 50px;
-            filter: drop-shadow(0px 1px 3px rgba(0,0,0,0.3));
+        /* Doppia ombra proiettata per l'effetto rilievo 3D delle lancette */
+        .copper-hand {
+            filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.35)) drop-shadow(0px 4px 6px rgba(0,0,0,0.15));
         }
-
-        .hour-hand { stroke-width: 4; }
-        .minute-hand { stroke-width: 2.5; }
-        .second-hand {
-            stroke: #bd3a15; /* Colore terracotta/autunnale per i secondi */
-            stroke-width: 1.5;
-        }
-
-        .center-dot { fill: #b8860b; }
 
         /* WIDGET METEO IN PANDANE CON LO STILE RESORT */
         .weather-widget {
@@ -185,7 +174,7 @@
 </head>
 <body>
 
-    <!-- Canvas per gli uccelli animati -->
+    <!-- Canvas per gli uccelli animati in background -->
     <canvas id="birdsCanvas"></canvas>
 
     <div class="dashboard-wrapper">
@@ -195,21 +184,46 @@
             
             <div class="clock-overlay">
                 <svg class="gold-clock" viewBox="0 0 100 100">
-                    <g stroke="#b8860b" stroke-width="1.5" stroke-linecap="round" opacity="0.75">
+                    <defs>
+                        <!-- Gradiente Rame Metallico Satinato -->
+                        <linearGradient id="copperGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#f5d6c6" />
+                            <stop offset="25%" stop-color="#d3835c" />
+                            <stop offset="50%" stop-color="#b25329" />
+                            <stop offset="75%" stop-color="#e3a384" />
+                            <stop offset="100%" stop-color="#803411" />
+                        </linearGradient>
+                    </defs>
+
+                    <!-- Indicatori ore rame -->
+                    <g stroke="url(#copperGradient)" stroke-width="1.5" stroke-linecap="round" opacity="0.8">
                         <line x1="50" y1="6" x2="50" y2="12" />
                         <line x1="94" y1="50" x2="88" y2="50" />
                         <line x1="50" y1="94" x2="50" y2="88" />
                         <line x1="6" y1="50" x2="12" y2="50" />
                     </g>
-                    <line id="hour" class="hand hour-hand" x1="50" y1="50" x2="50" y2="26" />
-                    <line id="minute" class="hand minute-hand" x1="50" y1="50" x2="50" y2="16" />
-                    <line id="second" class="hand second-hand" x1="50" y1="50" x2="50" y2="10" />
-                    <circle class="center-dot" cx="50" cy="50" r="3.5" />
+                    
+                    <!-- LANCETTE IN RAME COMPATIBILI E MODELLATE (Lunghe il doppio) -->
+                    <g id="hourGroup" class="copper-hand">
+                        <polygon points="48,50 50,15 52,50 50,62" fill="url(#copperGradient)" />
+                    </g>
+                    
+                    <g id="minuteGroup" class="copper-hand">
+                        <polygon points="48.5,50 50,4 51.5,50 50,68" fill="url(#copperGradient)" />
+                    </g>
+                    
+                    <g id="secondGroup" class="copper-hand">
+                        <rect x="49.3" y="2" width="1.4" height="73" fill="url(#copperGradient)" />
+                        <circle cx="50" cy="75" r="3" fill="url(#copperGradient)" />
+                    </g>
+                    
+                    <!-- Perno centrale -->
+                    <circle cx="50" cy="50" r="4.5" fill="url(#copperGradient)" style="filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.4));" />
                 </svg>
             </div>
         </div>
 
-        <!-- Widget Informazioni Meteo -->
+        <!-- Widget Informazioni Meteo Locali -->
         <div class="weather-widget">
             <div class="weather-loc">
                 <h2>Arnoga</h2>
@@ -227,71 +241,39 @@
     </div>
 
     <script>
-        // --- LOGICA OROLOGIO ---
-        const hourHand = document.getElementById('hour');
-        const minuteHand = document.getElementById('minute');
-        const secondHand = document.getElementById('second');
+        // --- LOGICA RE-INGEGNERIZZATA OROLOGIO LIVE CONTINUO ---
+        const hourGroup = document.getElementById('hourGroup');
+        const minuteGroup = document.getElementById('minuteGroup');
+        const secondGroup = document.getElementById('secondGroup');
 
-        function updateClock() {
+        function updateClockContinuous() {
             const now = new Date();
-            const seconds = now.getSeconds();
-            const minutes = now.getMinutes();
             const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+            const milliseconds = now.getMilliseconds();
 
-            const secondsDegrees = (seconds / 60) * 360;
-            const minutesDegrees = ((minutes / 60) * 360) + ((seconds / 60) * 6);
-            const hoursDegrees = ((hours % 12) / 12) * 360 + ((minutes / 60) * 30);
+            // Calcolo millesimale dei gradi per lo scorrimento fluido (movimento sweep a 60fps)
+            const exactSeconds = seconds + (milliseconds / 1000);
+            const exactMinutes = minutes + (exactSeconds / 60);
+            const exactHours = (hours % 12) + (exactMinutes / 60);
 
-            secondHand.style.transform = `rotate(${secondsDegrees}deg)`;
-            minuteHand.style.transform = `rotate(${minutesDegrees}deg)`;
-            hourHand.style.transform = `rotate(${hoursDegrees}deg)`;
+            const secondsDegrees = exactSeconds * 6;
+            const minutesDegrees = exactMinutes * 6;
+            const hoursDegrees = exactHours * 30;
+
+            // Iniezione diretta tramite attributi SVG nativi: garantisce il perfetto funzionamento su GitHub Pages
+            secondGroup.setAttribute("transform", `rotate(${secondsDegrees}, 50, 50)`);
+            minuteGroup.setAttribute("transform", `rotate(${minutesDegrees}, 50, 50)`);
+            hourGroup.setAttribute("transform", `rotate(${hoursDegrees}, 50, 50)`);
         }
 
-        setInterval(updateClock, 1000);
-        updateClock();
 
-
-        // --- LOGICA ANIMAZIONE UCCELLI CORRETTA ---
+        // --- LOGICA ANIMAZIONE ELEGANTE UCCELLI ---
         const canvas = document.getElementById('birdsCanvas');
         const ctx = canvas.getContext('2d');
 
         function initCanvasSize() {
-            // Calcolo esatto dei margini per forzare la visibilità del quadro di disegno
             canvas.width = window.innerWidth || document.documentElement.clientWidth;
             canvas.height = window.innerHeight || document.documentElement.clientHeight;
         }
-        
-        window.addEventListener('resize', () => {
-            initCanvasSize();
-        });
-        initCanvasSize();
-
-        class Bird {
-            constructor() {
-                this.reset();
-                this.x = Math.random() * canvas.width; // Sparpiglia gli uccelli all'avvio
-            }
-
-            reset() {
-                this.x = canvas.width + Math.random() * 200;
-                this.y = Math.random() * (canvas.height * 0.5); // Volano in alto sopra le scritte
-                this.size = Math.random() * 12 + 6; // Dimensioni differenti (6px a 18px)
-                this.speedX = Math.random() * 1.5 + 0.7; // Velocità random verso sinistra
-                this.wingSpeed = Math.random() * 0.15 + 0.08;
-                this.wingPhase = Math.random() * Math.PI;
-                // FIX: Opacità alzata per renderli ben nitidi sul fondo giallo/oro
-                this.opacity = Math.random() * 0.3 + 0.35; 
-            }
-
-            update() {
-                this.x -= this.speedX;
-                this.wingPhase += this.wingSpeed;
-                
-                // Se esce dallo schermo ricomincia da destra
-                if (this.x < -this.size * 2) {
-                    this.reset();
-                }
-            }
-
-            draw() {
-                ctx.save();
