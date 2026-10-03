@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arnoga Mountain View Resort & Spa - Live Clock</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            /* Sfondo animato fluido con i colori caldi del logo */
+            background: linear-gradient(135deg, #fffbf2, #fdf3cd, #fae9a4, #fffcf5);
+            background-size: 400% 400%;
+            animation: softGradient 18s ease infinite;
+            
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: sans-serif;
+            overflow: hidden;
+        }
+
+        /* Animazione per il movimento morbido dei colori di sfondo */
+        @keyframes softGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Contenitore principale del logo */
+        .logo-container {
+            position: relative;
+            width: 90%;
+            max-width: 800px;
+            display: inline-block;
+            /* Leggera ombra morbida per staccare delicatamente il logo dallo sfondo */
+            filter: drop-shadow(0 10px 25px rgba(212, 175, 55, 0.15));
+        }
+
+        /* L'immagine del logo fa da base proporzionale */
+        .logo-img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Contenitore dell'orologio posizionato esattamente sopra il cerchio giallo */
+        .clock-overlay {
+            position: absolute;
+            /* Coordinate percentuali calibrate sulla geometria esatta del cerchio del logo */
+            top: 0%; 
+            left: 58.6%;
+            width: 25.4%; 
+            height: 63%;
+            transform: translate(-50%, 0);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none; /* Evita interferenze con il mouse */
+        }
+
+        /* Stile dell'orologio SVG */
+        .gold-clock {
+            width: 78%;
+            height: 78%;
+        }
+
+        .hand {
+            stroke: #d4af37; /* Oro metallico elegante */
+            stroke-linecap: round;
+            transform-origin: 50px 50px;
+            filter: drop-shadow(0px 1px 3px rgba(0,0,0,0.25));
+        }
+
+        .hour-hand {
+            stroke-width: 4;
+        }
+
+        .minute-hand {
+            stroke-width: 2.5;
+        }
+
+        .second-hand {
+            stroke: #c86446; /* Terracotta/Arancio scuro soft per la lancetta dei secondi */
+            stroke-width: 1.5;
+        }
+
+        .center-dot {
+            fill: #d4af37;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="logo-container">
+        <!-- Richiamo al file PNG locale specificato -->
+        <img class="logo-img" src="logo-mountainviewresortarnoga.png" alt="Arnoga Mountain View Resort & Spa Logo">
+        
+        <!-- Orologio d'oro sovrapposto al centro del cerchio giallo -->
+        <div class="clock-overlay">
+            <svg class="gold-clock" viewBox="0 0 100 100">
+                <!-- Piccoli indicatori interni delle ore -->
+                <g stroke="#d4af37" stroke-width="1.5" stroke-linecap="round" opacity="0.7">
+                    <line x1="50" y1="6" x2="50" y2="12" />
+                    <line x1="94" y1="50" x2="88" y2="50" />
+                    <line x1="50" y1="94" x2="50" y2="88" />
+                    <line x1="6" y1="50" x2="12" y2="50" />
+                </g>
+                
+                <!-- Lancette dell'orologio -->
+                <line id="hour" class="hand hour-hand" x1="50" y1="50" x2="50" y2="26" />
+                <line id="minute" class="hand minute-hand" x1="50" y1="50" x2="50" y2="16" />
+                <line id="second" class="hand second-hand" x1="50" y1="50" x2="50" y2="10" />
+                
+                <!-- Perno centrale -->
+                <circle class="center-dot" cx="50" cy="50" r="3.5" />
+            </svg>
+        </div>
+    </div>
+
+    <script>
+        const hourHand = document.getElementById('hour');
+        const minuteHand = document.getElementById('minute');
+        const secondHand = document.getElementById('second');
+
+        function updateClock() {
+            const now = new Date();
+            const seconds = now.getSeconds();
+            const minutes = now.getMinutes();
+            const hours = now.getHours();
+
+            // Calcolo preciso dei gradi per ogni lancetta
+            const secondsDegrees = (seconds / 60) * 360;
+            const minutesDegrees = ((minutes / 60) * 360) + ((seconds / 60) * 6);
+            const hoursDegrees = ((hours % 12) / 12) * 360 + ((minutes / 60) * 30);
+
+            // Applica la rotazione alle lancette
+            secondHand.style.transform = `rotate(${secondsDegrees}deg)`;
+            minuteHand.style.transform = `rotate(${minutesDegrees}deg)`;
+            hourHand.style.transform = `rotate(${hoursDegrees}deg)`;
+        }
+
+        // Aggiorna l'orologio ogni secondo
+        setInterval(updateClock, 1000);
+        
+        // Avvio immediato al caricamento
+        updateClock();
+    </script>
+</body>
+</html>
